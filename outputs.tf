@@ -1,54 +1,39 @@
-output "default_ecs_role_id" {
-    value = "${aws_iam_role.default_ecs_role.id}"
-    description = "ID for the ECS role"
+output "bastion_id" {
+    value = "${aws_security_group.bastion_access.id}"
+    description = "ID of the Bastion security group"
 }
 
-output "arn" {
-    value = "${aws_iam_role.default_ecs_role.arn}"
-    description = "ARN for the ECS role"
+output "bastion_name" {
+    value = "${aws_security_group.bastion_access.name}"
+    description = "Name of the Bastion security group"
 }
 
-output "profile" {
-    value = "${aws_iam_instance_profile.default_ecs.id}"
-    description = "ID for the ECS profile"
+output "api_gateway_id" {
+    value = "${aws_security_group.api_gateway_access.id}"
+    description = "ID of the API Gateway security group"
 }
 
-output "cross_account_ecr_pull_role_id" {
-    value = "${aws_iam_role.cross_account_ecr_pull_role.id}"
-    description = "ID for the cross-account ECR pulling role"
+output "api_gateway_name" {
+    value = "${aws_security_group.api_gateway_access.name}"
+    description = "Name of the API Gateway security group"
 }
 
-output "cross_account_ecr_pull_role_arn" {
-    value = "${aws_iam_role.cross_account_ecr_pull_role.arn}"
-    description = "ARN for the cross-account ECR pulling role"
+output "alb_id" {
+    value = "${aws_security_group.alb_access.id}"
+    description = "ID of the Application Load Balancer security group"
 }
 
-output "cross_account_ecr_pull_profile_id" {
-    value = "${aws_iam_instance_profile.cross_account_ecr_pull_profile.id}"
-    description = "ID for the cross-account ECR pulling profile"
+output "alb_name" {
+    value = "${aws_security_group.alb_access.name}"
+    description = "Name of the Application Load Balancer security group"
 }
 
-output "start_stop_role_id" {
-    value = "${aws_iam_role.ec2_start_stop.id}"
-    description = "ID for the EC2 start/stop role"
+output "ec2_id" {
+    value = "${aws_security_group.ec2_access.id}"
+    description = "ID of the EC2 security group"
 }
 
-output "start_stop_role_arn" {
-    value = "${aws_iam_role.ec2_start_stop.arn}"
-    description = "ARN for the EC2 start/stop role"
-}
-
-output "start_stop_profile_id" {
-    value = "${aws_iam_instance_profile.ec2_start_stop.id}"
-    description = "ID for the EC2 start/stop profile"
-}
-
-output "dynamic_dns_role_id" {
-    value = "${aws_iam_role.dynamic_dns.id}"
-    description = "ID for the dynamic DNS role"
-}
-
-output "dynamic_dns_role_arn" {
-    value = "${aws_iam_role.dynamic_dns.arn}"
-    description = "ARN for the dynamic DNS role"
+output "ec2_name" {
+    value = "${aws_security_group.ec2_access.name}"
+    description = "Name of the EC2 security group"
 }

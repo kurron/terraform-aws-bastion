@@ -4,6 +4,8 @@ terraform {
 }
 
 provider "aws" {
+    access_key = "${var.aws_access_key}"
+    secret_key = "${var.aws_secret_key}"
     region     = "${var.region}"
 }
 
@@ -16,75 +18,120 @@ data "terraform_remote_state" "vpc" {
     }
 }
 
-# === construct a role that allows auto-registration of EC2 instances to Route53
-resource "aws_iam_role" "dynamic_dns" {
-    name_prefix        = "dynamic-dns-"
-    description        = "Allows Lambda instances to assume required roles"
-    assume_role_policy = "${file( "${path.module}/files/ddns-trust.json" )}"
+resource "aws_security_group" "bastion_access" {
+    name_prefix = "bastion-"
+    description = "Controls access to the Bastion boxes"
+    vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+    tags {
+        Name        = "Bastion Access"
+        Project     = "${var.project}"
+        Purpose     = "Controls access to the Bastion boxes"
+        Creator     = "${var.creator}"
+        Environment = "${var.environment}"
+        Freetext    = "${var.freetext}"
+    }
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-resource "aws_iam_role_policy" "dynamic_dns" {
-    name_prefix = "dynamic-dns-"
-    role        = "${aws_iam_role.dynamic_dns.id}"
-    policy      = "${file("${path.module}/files/ddns-policy.json")}"
+resource "aws_security_group" "api_gateway_access" {
+    name_prefix = "api-gateway-"
+    description = "Controls access to the API Gateway"
+    vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+    tags {
+        Name        = "API Gateway Access"
+        Project     = "${var.project}"
+        Purpose     = "Controls access to the API Gateway"
+        Creator     = "${var.creator}"
+        Environment = "${var.environment}"
+        Freetext    = "${var.freetext}"
+    }
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-# === construct a role that allows starting/stopping EC2 instances on a schedule
-resource "aws_iam_role" "ec2_start_stop" {
-    name_prefix        = "start-stop-"
-    description        = "Allows Lambda instances to assume required roles"
-    assume_role_policy = "${file( "${path.module}/files/ec2-start-stop-assumption-policy.json" )}"
+resource "aws_security_group" "alb_access" {
+    name_prefix = "alb-"
+    description = "Controls access to the Application Load Balancer"
+    vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+    tags {
+        Name        = "Application Load Balancer Access"
+        Project     = "${var.project}"
+        Purpose     = "Controls access to the Application Load Balancer"
+        Creator     = "${var.creator}"
+        Environment = "${var.environment}"
+        Freetext    = "${var.freetext}"
+    }
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-resource "aws_iam_role_policy" "ec2_start_stop" {
-    name_prefix = "start-stop-"
-    role        = "${aws_iam_role.ec2_start_stop.id}"
-    policy      = "${file("${path.module}/files/ec2-start-stop-policy.json")}"
+resource "aws_security_group" "ec2_access" {
+    name_prefix = "ec2-"
+    description = "Controls access to the EC2 instances"
+    vpc_id = "${data.terraform_remote_state.vpc.vpc_id}"
+    tags {
+        Name        = "EC2 Access"
+        Project     = "${var.project}"
+        Purpose     = "Controls access to the EC2 instances"
+        Creator     = "${var.creator}"
+        Environment = "${var.environment}"
+        Freetext    = "${var.freetext}"
+    }
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-resource "aws_iam_instance_profile" "ec2_start_stop" {
-    name_prefix = "start-stop-"
-    role  = "${aws_iam_role.ec2_start_stop.name}"
+# build the rules AFTER the empty security groups are constructed to avoid circular references
+
+resource "aws_security_group_rule" "bastion_ingress" {
+    type              = "ingress"
+    cidr_blocks       = "${var.bastion_ingress_cidr_blocks}"
+    from_port         = 22
+    protocol          = "tcp"
+    security_group_id = "${aws_security_group.bastion_access.id}"
+    to_port           = 22
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-# === construct a role that allows pulling from ECR
-resource "aws_iam_role" "cross_account_ecr_pull_role" {
-    name_prefix        = "ecr-pull-"
-    description        = "Allows EC2 instances to assume required roles"
-    assume_role_policy = "${file( "${path.module}/files/ecr-pull-only-assumption-policy.json" )}"
+resource "aws_security_group_rule" "bastion_egress" {
+    type              = "egress"
+    cidr_blocks       = ["0.0.0.0/0"]
+    from_port         = 0
+    protocol          = "all"
+    security_group_id = "${aws_security_group.bastion_access.id}"
+    to_port           = 65535
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-resource "aws_iam_role_policy" "cross_account_ecr_pull_role_policy" {
-    name_prefix = "ecr-pull-"
-    role        = "${aws_iam_role.cross_account_ecr_pull_role.id}"
-    policy      = "${file("${path.module}/files/ecr-pull-only-policy.json")}"
+resource "aws_security_group_rule" "ec2_ingress" {
+    type                     = "ingress"
+    from_port                = 0
+    protocol                 = "all"
+    security_group_id        = "${aws_security_group.ec2_access.id}"
+    source_security_group_id = "${aws_security_group.bastion_access.id}"
+    to_port                  = 65535
+    lifecycle {
+        create_before_destroy = true
+    }
 }
 
-resource "aws_iam_instance_profile" "cross_account_ecr_pull_profile" {
-    name_prefix = "ecr-pull-"
-    role  = "${aws_iam_role.cross_account_ecr_pull_role.name}"
-}
-
-# construct a role that allow ECS instances to interact with load balancers
-resource "aws_iam_role" "default_ecs_role" {
-    name_prefix = "ecs-role"
-    description = "Allows ECS workers to assume required roles"
-    assume_role_policy = "${file( "${path.module}/files/default-ecs-role-policy.json" )}"
-}
-
-resource "aws_iam_role_policy" "default_ecs_service_role_policy" {
-    name_prefix = "ecs-service-role-${var.project}-${var.environment}-"
-    role = "${aws_iam_role.default_ecs_role.id}"
-    policy = "${file( "${path.module}/files/default-ecs-service-role-policy.json" )}"
-}
-
-resource "aws_iam_role_policy" "default_ecs_instance_role_policy" {
-    name_prefix = "ecs-instance-role-policy-${var.project}-${var.environment}-"
-    role = "${aws_iam_role.default_ecs_role.id}"
-    policy = "${file( "${path.module}/files/default-ecs-instance-role-policy.json" )}"
-}
-
-resource "aws_iam_instance_profile" "default_ecs" {
-    name_prefix = "ecs-instance-profile-${var.project}-${var.environment}-"
-    role  = "${aws_iam_role.default_ecs_role.name}"
+resource "aws_security_group_rule" "ec2_egress" {
+    type               = "egress"
+    cidr_blocks        = ["0.0.0.0/0"]
+    from_port          = 0
+    protocol           = "all"
+    security_group_id  = "${aws_security_group.ec2_access.id}"
+    to_port            = 65535
+    lifecycle {
+        create_before_destroy = true
+    }
 }
