@@ -16,6 +16,7 @@ variable "vpc_key" {
 variable "vpc_region" {
     type = "string"
     description = "Region where the S3 bucket containing the VPC Terraform state is located"
+    default = "us-east-1"
 }
 
 variable "security_groups_bucket" {
@@ -31,6 +32,7 @@ variable "security_groups_key" {
 variable "security_groups_region" {
     type = "string"
     description = "Region where the S3 bucket containing the security groups Terraform state is located"
+    default = "us-east-1"
 }
 
 variable "project" {
