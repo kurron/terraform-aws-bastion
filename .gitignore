@@ -1,2 +1,4 @@
 *.backup
-hosts.ini
+*.plan
+*.txt
+.terraform/

@@ -3,6 +3,16 @@ variable "region" {
     description = "The AWS region to deploy into (e.g. us-east-1)"
 }
 
+variable "aws_access_key" {
+    type = "string"
+    description = "ID of the API key to use"
+}
+
+variable "aws_secret_key" {
+    type = "string"
+    description = "Secret value of the API key to use"
+}
+
 variable "vpc_bucket" {
     type = "string"
     description = "S3 bucket containing the VPC Terraform state"

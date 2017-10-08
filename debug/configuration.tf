@@ -1,0 +1,25 @@
+region = "us-west-2"
+
+vpc_bucket = "transparent-test-terraform-state"
+vpc_key    = "us-west-2/debug/networking/vpc/terraform.tfstate"
+
+security_groups_bucket = "transparent-test-terraform-state"
+security_groups_key    = "us-west-2/debug/networking/security-groups/terraform.tfstate"
+
+project     = "Debug"
+creator     = "kurron@jvmguy.com"
+environment = "development"
+freetext    = "No notes at this time."
+
+instance_type               = "t2.nano"
+ssh_key_name                = "Bastion"
+min_size                    = "1"
+max_size                    = "2"
+cooldown                    = "60"
+health_check_grace_period   = "300"
+desired_capacity            = "1"
+scale_down_desired_capacity = "0"
+scale_down_min_size         = "0"
+scale_up_cron               = "0 7 * * MON-FRI"
+scale_down_cron             = "0 0 * * MON-FRI"
+public_ssh_key              = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCv70t6ne08BNDf3aAQOdhe7h1NssBGPEucjKA/gL9vXpclGBqZnvOiQltKrOeOLzcbDJYDMYIJCwtoq7R/3RLOLDSi5OChhFtyjGULkIxa2dJgKXWPz04E1260CMqkKcgrQ1AaYA122zepakE7d+ysMoKSbQSVGaleZ6aFxe8DfKMzAFFra44tF5JUSMpuqwwI/bKEyehX/PDMNe/GWUTk+5c4XC6269NbaeWMivH2CiYPPBXblj6IT+QhBY5bTEFT57GmUff1sJOyhGN+9kMhlsSrXtp1A5wGiZ8nhoUduphzP3h0RNbRVA4mmI4jMnOF51uKbOvNk3Y79FSIS9Td Access to Bastion box"

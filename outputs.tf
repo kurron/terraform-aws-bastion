@@ -1,39 +1,29 @@
-output "bastion_id" {
-    value = "${aws_security_group.bastion_access.id}"
-    description = "ID of the Bastion security group"
+output "ami_id" {
+    value = "${data.aws_ami.amazon_linux_ami.id}"
+    description = "ID of the selected AMI"
 }
 
-output "bastion_name" {
-    value = "${aws_security_group.bastion_access.name}"
-    description = "Name of the Bastion security group"
+output "launch_configuration_id" {
+    value = "${aws_launch_configuration.bastion.id}"
+    description = "ID of the Bastion's launch configuration"
 }
 
-output "api_gateway_id" {
-    value = "${aws_security_group.api_gateway_access.id}"
-    description = "ID of the API Gateway security group"
+output "launch_configuration_name" {
+    value = "${aws_launch_configuration.bastion.name}"
+    description = "Name of the Bastion's launch configuration"
 }
 
-output "api_gateway_name" {
-    value = "${aws_security_group.api_gateway_access.name}"
-    description = "Name of the API Gateway security group"
+output "auto_scaling_group_id" {
+    value = "${aws_autoscaling_group.bastion.id}"
+    description = "ID of the Bastion's auto scaling group"
 }
 
-output "alb_id" {
-    value = "${aws_security_group.alb_access.id}"
-    description = "ID of the Application Load Balancer security group"
+output "auto_scaling_group_name" {
+    value = "${aws_autoscaling_group.bastion.name}"
+    description = "Name of the Bastion's auto scaling group"
 }
 
-output "alb_name" {
-    value = "${aws_security_group.alb_access.name}"
-    description = "Name of the Application Load Balancer security group"
-}
-
-output "ec2_id" {
-    value = "${aws_security_group.ec2_access.id}"
-    description = "ID of the EC2 security group"
-}
-
-output "ec2_name" {
-    value = "${aws_security_group.ec2_access.name}"
-    description = "Name of the EC2 security group"
+output "ssh_key_name" {
+    value = "${aws_key_pair.bastion.key_name}"
+    description = "Name of the Bastion's SSH key"
 }
