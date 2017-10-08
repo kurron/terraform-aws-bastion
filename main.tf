@@ -1,30 +1,10 @@
 terraform {
-    required_version = ">= 0.10.3"
+    required_version = ">= 0.10.6"
     backend "s3" {}
 }
 
 provider "aws" {
-    access_key = "${var.aws_access_key}"
-    secret_key = "${var.aws_secret_key}"
     region     = "${var.region}"
-}
-
-data "terraform_remote_state" "vpc" {
-    backend = "s3"
-    config {
-        bucket = "${var.vpc_bucket}"
-        key    = "${var.vpc_key}"
-        region = "${var.vpc_region}"
-    }
-}
-
-data "terraform_remote_state" "security-groups" {
-    backend = "s3"
-    config {
-        bucket = "${var.security_groups_bucket}"
-        key    = "${var.security_groups_key}"
-        region = "${var.security_groups_region}"
-    }
 }
 
 data "aws_ami" "amazon_linux_ami" {
@@ -67,7 +47,7 @@ resource "aws_launch_configuration" "bastion" {
     image_id                    = "${data.aws_ami.amazon_linux_ami.id}"
     instance_type               = "${var.instance_type}"
     key_name                    = "${aws_key_pair.bastion.key_name}"
-    security_groups             = ["${data.terraform_remote_state.security-groups.bastion_id}"]
+    security_groups             = ["${var.security_group_ids}"]
     associate_public_ip_address = true
     enable_monitoring           = true
     lifecycle {
@@ -79,13 +59,12 @@ resource "aws_autoscaling_group" "bastion" {
     name_prefix               = "Bastion-"
     max_size                  = "${var.max_size}"
     min_size                  = "${var.min_size}"
-    availability_zones        = ["${data.terraform_remote_state.vpc.availability_zones}"]
     default_cooldown          = "${var.cooldown}"
     launch_configuration      = "${aws_launch_configuration.bastion.name}"
     health_check_grace_period = "${var.health_check_grace_period }"
     health_check_type         = "EC2"
     desired_capacity          = "${var.desired_capacity}"
-    vpc_zone_identifier       = ["${data.terraform_remote_state.vpc.public_subnet_ids}"]
+    vpc_zone_identifier       = ["${var.subnet_ids}"]
     termination_policies      = ["ClosestToNextInstanceHour", "OldestInstance", "Default"]
     enabled_metrics           = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
     lifecycle {

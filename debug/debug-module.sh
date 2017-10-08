@@ -10,7 +10,7 @@ INIT="terraform init -backend=true \
                      -lock=true \
                      -upgrade=true \
                      -verify-plugins=true \
-                     ."
+                     debug"
 echo ${INIT}
 ${INIT}
 
@@ -22,8 +22,8 @@ PLAN="terraform plan -refresh=true \
                      -input=false \
                      -lock=true \
                      -out=debug/proposed-changes.plan \
-                     -var-file=debug/configuration.tf \
-                     -refresh=true"
+                     -refresh=true \
+                     debug"
 echo ${PLAN}
 ${PLAN}
 
@@ -40,7 +40,7 @@ echo ${APPLY}
 ${APPLY}
 
 DESTROY="terraform destroy -refresh=true \
-                           -var-file=debug/configuration.tf \
-                           -input=false"
+                           -input=false \
+                           debug"
 echo ${DESTROY}
 ${DESTROY}
