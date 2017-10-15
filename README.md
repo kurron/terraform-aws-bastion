@@ -1,5 +1,8 @@
 # Overview
-This Terraform module is ...
+This Terraform module creates an auto-scaling group that ensures at least
+one Bastion instance is always available.  The Bastion only allows SSH traffic
+from the provided CIDR ranges.  The auto-scaling group is set start and
+stop instances on a schedule.
 
 # Prerequisites
 * [Terraform](https://terraform.io/) installed and working
